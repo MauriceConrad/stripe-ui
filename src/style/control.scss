@@ -1,0 +1,41 @@
+.control {
+  > header {
+    display: grid;
+    grid-template-columns: max-content auto;
+    gap: 10px;
+    .n-h3 {
+      margin: 5px 0;
+      font-weight: 600;
+    }
+    .actions {
+      display: grid;
+      place-items: center left;
+    }
+  }
+}
+
+.data-table {
+  font-size: 1.1em;
+  font-weight: 300;
+  row-gap: 10px;
+  border-spacing: 0px 20px;
+  tr {
+    td {
+      > .line {
+        display: block;
+      }
+    }
+    td:first-child {
+      opacity: 0.55;
+      vertical-align: top;
+      font-weight: 300;
+      padding-right: 20px;
+    }
+  }
+}
+
+.n-divider {
+  margin: 5px 0;
+}
+
+

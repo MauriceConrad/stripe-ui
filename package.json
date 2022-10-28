@@ -1,0 +1,42 @@
+{
+  "name": "stripeui",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./lib/stripe-ui.es.js",
+      "require": "./lib/stripe-ui.umd.js"
+    },
+    "./style.css": "./lib/style.css"
+  },
+  "types": "./lib/index.d.ts",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@stripe/stripe-js": "^1.42.0",
+    "@vicons/ionicons5": "^0.12.0",
+    "axios": "^1.1.3",
+    "color": "^4.2.3",
+    "lodash": "^4.17.21",
+    "vue": "^3.2.37"
+  },
+  "peerDependencies": {
+    "naive-tools": "^0.1.23",
+    "naive-ui": "^2.33.5"
+  },
+  "devDependencies": {
+    "@types/color": "^3.0.3",
+    "@types/node": "^18.11.3",
+    "@vitejs/plugin-vue": "^3.1.0",
+    "sass": "^1.55.0",
+    "stripe": "^10.15.0",
+    "typescript": "^4.6.4",
+    "vite": "^3.1.0",
+    "vite-plugin-dts": "^1.6.6",
+    "vue-tsc": "^0.40.4"
+  }
+}
