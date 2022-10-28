@@ -1,5 +1,5 @@
 {
-  "name": "stripeui",
+  "name": "vue-stripe-ui",
   "private": false,
   "version": "0.0.1",
   "type": "module",
