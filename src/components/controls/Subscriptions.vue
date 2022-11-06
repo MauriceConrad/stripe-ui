@@ -9,10 +9,17 @@
     <n-divider />
     <n-spin :show="subscriptionsFetching">
       <div class="subscription-cards">
+        <n-empty v-if="subscriptions && subscriptions.length === 0" description="No active subscriptions">
+          <template #icon>
+            <n-icon>
+              <document-text-outline />
+            </n-icon>
+          </template>
+        </n-empty>
         <n-card v-for="{ id, items, description, default_payment_method, metadata, status, plan } in subscriptions" :key="id" :title="items.data.map(item => (item.price.product as Stripe.Product).name).join(' + ')">
           <template #header-extra>
             <n-space>
-              <n-button tertiary>
+              <n-button tertiary @click="triggerCanceling(id)">
                 <template #icon>
                   <n-icon>
                     <close-outline />
@@ -75,8 +82,8 @@ import type { StripeBridge } from '../../types'
 import useCustomer from '../../services/customer'
 import { computed, ref } from 'vue'
 import propToComputed from '../../controllers/propToComputed'
-import { NButton, NIcon, NForm, NFormItem, NDivider, NH3, NInput, NSpace, NSpin, NList, NCard, NTag, NCollapse, NCollapseItem, NTable, NPopover } from 'naive-ui'
-import { CreateOutline, ArrowBackOutline, SaveOutline, CloseOutline } from '@vicons/ionicons5'
+import { NButton, NIcon, NForm, NFormItem, NDivider, NH3, NInput, NSpace, NSpin, NList, NCard, NTag, NCollapse, NCollapseItem, NEmpty, NTable, NPopover, useDialog } from 'naive-ui'
+import { CreateOutline, ArrowBackOutline, SaveOutline, CloseOutline, DocumentTextOutline } from '@vicons/ionicons5'
 // @ts-expect-error no types
 import { NPopup } from 'naive-tools'
 import 'naive-tools/style.css'
@@ -92,6 +99,7 @@ const props = defineProps<{
 }>();
 const emit = defineEmits(['ready']);
 
+const dialog = useDialog();
 
 const screen = useScreen();
 const isMobile = computed(() => screen.width <= 600);
@@ -110,6 +118,18 @@ const editMode = ref(false);
 const save = async () => {
   
   editMode.value = false;
+}
+
+const triggerCanceling = (subscriptionId: string) => {
+  const cancelDialog = dialog.error({
+    title: 'Cancel the subscription?',
+    content: 'All related services and products will stop working to the end of the current billing period.',
+    positiveText: 'Cancel Subscription',
+    onPositiveClick() {
+      deleteSubscription(subscriptionId);
+      cancelDialog.destroy();
+    }
+  });
 }
 
 

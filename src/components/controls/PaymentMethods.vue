@@ -8,6 +8,13 @@
     </header>
     <n-divider />
     <n-spin :show="paymentMethodsFetching">
+      <n-empty v-if="paymentMethods && paymentMethods.length === 0" description="No payment methods">
+        <template #icon>
+          <n-icon>
+            <card-outline />
+          </n-icon>
+        </template>
+      </n-empty>
       <n-list class="payment-methods-list">
         <PaymentMethod v-for="{ id, billing_details, card, type, created } in paymentMethods" :key="id" :card="card">
           <template #tags>
@@ -26,7 +33,7 @@
       </n-list>
       <div class="payment-actions">
         <n-spin :show="creatingCheckoutSession">
-          <n-popup v-model:show="showAddView" title="Add Payment Method" :type="isMobile ? 'layer' : 'frame'" :fixed-width="isMobile ? false : 800" :fixed-height="isMobile ? false : 360">
+          <!-- <n-popup v-model:show="showAddView" title="Add Payment Method" :type="isMobile ? 'layer' : 'frame'" :fixed-width="isMobile ? false : 800" :fixed-height="isMobile ? false : 360">
             <template #trigger>
               <n-button round type="success">
                 <template #icon>
@@ -45,9 +52,14 @@
               </div>
             </div>
             
-          </n-popup>
-          <n-button round text type="success" :disabled="creatingCheckoutSession" @click="createCheckoutSession">
-            Add via Stripe
+          </n-popup> -->
+          <n-button round type="success" :disabled="creatingCheckoutSession" @click="createCheckoutSession">
+            <template #icon>
+              <n-icon>
+                <add-outline />
+              </n-icon>
+            </template>
+            Add Payment Method
           </n-button>
         </n-spin>
       </div>
@@ -61,8 +73,8 @@ import type { StripeBridge } from '../../types'
 import usePaymentMethods from '../../services/paymentMethods'
 import { computed, ref, watch, watchEffect } from 'vue'
 import propToComputed from '../../controllers/propToComputed'
-import { NButton, NIcon, NForm, NFormItem, NDivider, NH3, NInput, NSpace, NSpin, NList, NListItem, NTag, useDialog } from 'naive-ui'
-import { CreateOutline, ArrowBackOutline, SaveOutline, TrashOutline, PricetagOutline, CloseOutline, AddOutline } from '@vicons/ionicons5'
+import { NButton, NIcon, NForm, NFormItem, NEmpty, NDivider, NH3, NInput, NSpace, NSpin, NList, NListItem, NTag, useDialog } from 'naive-ui'
+import { CreateOutline, ArrowBackOutline, SaveOutline, TrashOutline, CardOutline, CloseOutline, AddOutline } from '@vicons/ionicons5'
 // @ts-expect-error no types
 import { NPopup } from 'naive-tools'
 import 'naive-tools/style.css'
@@ -110,7 +122,7 @@ const creatingCheckoutSession = ref(false);
 const checkoutSession = ref<Stripe.Checkout.Session>();
 const createCheckoutSession = async () => {
   creatingCheckoutSession.value = true;
-  checkoutSession.value = await createSession(['card', 'sepa_debit'], props.successUrl, props.cancelUrl);
+  checkoutSession.value = await createSession(['card', 'sepa_debit'], props.successUrl, props.cancelUrl, 'setup');
   creatingCheckoutSession.value = false;
   if (checkoutSession.value.url) {
     window.location.href = checkoutSession.value.url;

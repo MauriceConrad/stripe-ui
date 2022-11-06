@@ -8,6 +8,13 @@
     </header>
     <n-divider />
     <n-spin :show="invoicesFetching">
+      <n-empty v-if="invoices && invoices.length === 0" description="No invoices yet">
+        <template #icon>
+          <n-icon>
+            <document-attach-outline />
+          </n-icon>
+        </template>
+      </n-empty>
       <n-list class="invoices-list">
         <n-list-item class="invoice-item" v-for="{ created, id, total, status, hosted_invoice_url, invoice_pdf, lines, currency,  }, index in invoices" :key="id">
           <div class="date">
@@ -55,10 +62,10 @@
 <script setup lang="ts">
 import { watch } from 'vue'
 import { StripeBridge } from '../../types'
-import { NDivider, NH3, NButton, NSpin, NList, NListItem, NTag, NSpace, NIcon } from 'naive-ui'
+import { NDivider, NH3, NButton, NSpin, NList, NListItem, NTag, NSpace, NIcon, NEmpty } from 'naive-ui'
 import useInvoices from '../../services/invoices'
 import { toPriceStr } from '../../util/helpers'
-import { CardOutline, DocumentTextOutline } from '@vicons/ionicons5'
+import { CardOutline, DocumentTextOutline, DocumentAttachOutline } from '@vicons/ionicons5'
 
 const props = defineProps<{
   bridge: StripeBridge;
