@@ -11,6 +11,16 @@
       <table class="data-table">
         <tr>
           <td>
+            Name
+          </td>
+          <td>
+            <span class="line">
+              {{ name }}
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <td>
             Mail
           </td>
           <td>
@@ -50,7 +60,7 @@
         </tr>
       </table>
       <n-space class="actions" vertical>
-        <n-popup v-model:show="editMode" title="Edit Address" :type="isMobile ? 'layer' : 'frame'" :fixed-width="isMobile ? false : 800" :fixed-height="isMobile ? false : 580">
+        <n-popup v-model:show="editMode" title="Edit Address" :type="isMobile ? 'layer' : 'frame'" :fixed-width="isMobile ? false : 800" :fixed-height="isMobile ? false : 660">
           <template #trigger>
             <n-button round tertiary size="medium">
               <template #icon>
@@ -64,6 +74,9 @@
           <div class="popup-inner">
             <n-spin :show="customerUpdating">
               <n-form ref="formRef" label-placement="top" require-mark-placement="right-hanging" label-width="auto">
+                <n-form-item label="Name">
+                  <n-input v-model:value="name" placeholder="name" />
+                </n-form-item>
                 <div class="form-flex-grid">
                   <n-form-item label="Mail">
                     <n-input v-model:value="email" placeholder="e-mail" :input-props="{ type: 'email' }" />
@@ -141,6 +154,7 @@ const { customer, fetchCustomer, updateCustomer, customerUpdating, customerFetch
 //   }
 // })
 
+const name = propToComputed<string | undefined>(customer, ['name']);
 const email = propToComputed<string | undefined>(customer, ['email']);
 const phone = propToComputed<string | undefined>(customer, ['phone']);
 

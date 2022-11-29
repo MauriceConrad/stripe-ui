@@ -15,6 +15,8 @@ export async function __fetchCustomer(bridge: StripeBridge) {
 
 export async function __updateCustomer(bridge: StripeBridge) {
   if (customer.value) {
+    console.log('curr customer', customer.value);
+    
     customerUpdating.value = true;
     await bridge.customer.set(customer.value);
     customerUpdating.value = false;

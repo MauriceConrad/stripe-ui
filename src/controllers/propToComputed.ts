@@ -9,9 +9,10 @@ export default function propToComputed<T>(objectRef: Ref<unknown | undefined>, p
       }
     },
     set(newValue) {
-      if (get(objectRef.value, path)) {
+      try {
         return set(objectRef.value as any, path, newValue);
       }
+      catch {}
     }
   })
 }

@@ -16,7 +16,7 @@
         </template>
       </n-empty>
       <n-list class="invoices-list">
-        <n-list-item class="invoice-item" v-for="{ created, id, total, status, hosted_invoice_url, invoice_pdf, lines, currency,  }, index in invoices" :key="id">
+        <n-list-item class="invoice-item" v-for="{ created, id, total, status, hosted_invoice_url, invoice_pdf, lines, currency }, index in invoices" :key="id">
           <div class="date">
             {{ new Date(created * 1000).toLocaleDateString('de-DE', { year: 'numeric', month: 'numeric', day: 'numeric' }) }}
           </div>
