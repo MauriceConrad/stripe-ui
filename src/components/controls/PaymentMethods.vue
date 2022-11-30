@@ -145,9 +145,9 @@ fetchPaymentMethods('card').then(() => {
   emit('ready');
 });
 
-if (paymentMethods.value && paymentMethods.value[0].card?.brand === '') {
+// if (paymentMethods.value && paymentMethods.value[0]?.card?.brand === '') {
   
-}
+// }
 
 
 const editMode = ref(false);
