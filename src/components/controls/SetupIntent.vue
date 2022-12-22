@@ -5,7 +5,7 @@
     </n-spin>
     <div class="actions">
       <n-button type="success" round @click="confirmPayment">
-        Confirm
+        {{ props.localization?.['confirm'] ?? 'Confirm'}}
       </n-button>
     </div>
   </div>
@@ -23,6 +23,9 @@ const props = defineProps<{
   clientSecret: string;
   redirectUrl: string;
   stripePublishableApiKey: string;
+  localization?: {
+    [key: string]: string;
+  };
 }>();
 const emit = defineEmits(['confirm']);
 

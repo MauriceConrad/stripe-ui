@@ -2,57 +2,70 @@
   <div class="invoices control">
     <header>
       <n-h3>
-        Invoices
+        {{ props.localization?.['invoices'] ?? 'Invoices'}}
       </n-h3>
       
     </header>
     <n-divider />
     <n-spin :show="invoicesFetching">
-      <n-empty v-if="invoices && invoices.length === 0" description="No invoices yet">
+      <n-empty v-if="invoices && invoices.length === 0" :description=" props.localization?.['invoices-empty'] ?? 'No invoices yet'">
         <template #icon>
           <n-icon>
             <document-attach-outline />
           </n-icon>
         </template>
       </n-empty>
-      <n-list class="invoices-list">
-        <n-list-item class="invoice-item" v-for="{ created, id, total, status, hosted_invoice_url, invoice_pdf, lines, currency }, index in invoices" :key="id">
-          <div class="date">
-            {{ new Date(created * 1000).toLocaleDateString('de-DE', { year: 'numeric', month: 'numeric', day: 'numeric' }) }}
-          </div>
-          <div class="price">
-            {{ toPriceStr(total / 100, currency, 'de-DE') }}
-          </div>
-          <div class="tags">
-            <n-tag :type="status === 'paid' ? 'success' : 'error'">{{ status }}</n-tag>
-          </div>
-          <div class="description">
-            {{ lines.data[0].description }}
-          </div>
-          <div class="actions">
-            <n-space>
-              <n-button v-if="!['paid', 'voided'].includes(status ?? '')" tag="a" :href="hosted_invoice_url" round tertiary>
-                <template #icon>
-                  <n-icon>
-                    <card-outline />
-                  </n-icon>
-                </template>
-                Pay
-              </n-button>
-              <n-button tag="a" :href="invoice_pdf" round tertiary>
-                <template #icon>
-                  <n-icon>
-                    <document-text-outline />
-                  </n-icon>
-                </template>
-                Download
-              </n-button>
-            </n-space>
-          </div>
+      <n-list v-else class="invoices-list">
+        <n-list-item v-for="{ created, id, total, status, hosted_invoice_url, invoice_pdf, lines, currency }, index in invoices?.[page - 1]" :key="id">
+          <n-card class="invoice-item">
+            <div class="lines">
+              <div>
+                <div class="date">
+                  {{ new Date(created * 1000).toLocaleDateString(props.localization?.['locale'] ?? 'de-DE', { year: 'numeric', month: 'numeric', day: 'numeric' }) }}
+                </div>
+                <div class="description">
+                  {{ lines.data[0].description }}
+                </div>
+              </div>
+              <div>
+                <div class="price">
+                  {{ toPriceStr(total / 100, currency, 'de-DE') }}
+                </div>
+                <div class="tags">
+                  <n-tag :type="status === 'paid' ? 'success' : 'error'">{{ props.localization?.[status ?? ''] ?? status }}</n-tag>
+                </div>
+              </div>
+            </div>
+            <div class="actions">
+              <n-space>
+                <n-button v-if="!['paid', 'voided'].includes(status ?? '')" tag="a" :href="hosted_invoice_url" round tertiary>
+                  <template #icon>
+                    <n-icon>
+                      <card-outline />
+                    </n-icon>
+                  </template>
+                  {{props.localization?.['pay'] ?? 'Pay'}}
+                </n-button>
+                <n-button tag="a" :href="invoice_pdf" round tertiary>
+                  <template #icon>
+                    <n-icon>
+                      <document-text-outline />
+                    </n-icon>
+                  </template>
+                  {{ props.localization?.['download'] ?? 'Download'}}
+                </n-button>
+              </n-space>
+            </div>
+          </n-card>
         </n-list-item>
       </n-list>
-      <div class="invoices-actions">
-        <n-button @click="loadMoreInvoices">Load more</n-button>
+      <n-pagination 
+        v-model:page="page" 
+        :page-count="invoices?.length" 
+        :style="{ display: 'flex', justifyContent: 'center' }"
+      />
+      <div v-if="page === invoices?.length ?? 1" class="invoices-actions">
+        <n-button @click="loadMoreInvoices">{{ props.localization?.['load-more'] ?? 'Load more'}}</n-button>
       </div>
     </n-spin>
   </div>
@@ -60,28 +73,41 @@
 
 
 <script setup lang="ts">
-import { watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { StripeBridge } from '../../types'
-import { NDivider, NH3, NButton, NSpin, NList, NListItem, NTag, NSpace, NIcon, NEmpty } from 'naive-ui'
+import { NDivider, NH3, NButton, NSpin, NList, NListItem, NTag, NSpace, NIcon, NEmpty, NCard, NPagination } from 'naive-ui'
 import useInvoices from '../../services/invoices'
 import { toPriceStr } from '../../util/helpers'
 import { CardOutline, DocumentTextOutline, DocumentAttachOutline } from '@vicons/ionicons5'
+import { chunk } from 'lodash'
 
 const props = defineProps<{
   bridge: StripeBridge;
+  localization?: {
+    [key: string]: string;
+  };
 }>();
 const emit = defineEmits(['ready']);
 
 
-const { invoices, invoicesFetching, fetchInvoices } = useInvoices(props.bridge);
+const { invoices: allInvoices, invoicesFetching, fetchInvoices } = useInvoices(props.bridge);
 fetchInvoices().then(() => {
   emit('ready')
 });
 
+const page = ref(1);
+
+const invoices = computed(() => {
+  if (allInvoices.value) {
+    return chunk(allInvoices.value, 10);
+  }
+  return null;
+});
+
 
 const loadMoreInvoices = () => {
-  if (invoices.value) {
-    fetchInvoices(invoices.value[invoices.value.length - 1].id);
+  if (allInvoices.value) {
+    fetchInvoices(allInvoices.value?.[allInvoices.value.length - 1].id);
   }
 }
 
@@ -95,18 +121,27 @@ const payInvoice = (invoiceHostedUrl: string) => {
 .invoices-list {
   background-color: transparent;
   .invoice-item {
-    padding: 10px 15px;
-    ::v-deep(.n-list-item__main) {
-      display: grid;
+    ::v-deep(.n-card__content) {
+      display: flex;
       align-items: center;
-      grid-template-columns: max-content max-content max-content auto max-content;
-      gap: 20px;
-      .date {
-
+      .lines {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: .5rem;
+        > * {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: .5rem;
+          .price {
+            font-weight: 600;
+            font-size: 1.1em;
+          }
+        }
       }
-      .price {
-        font-weight: 700;
-        font-size: 1.1em;
+      .actions {
+        flex-grow: 0;
       }
     }
   }

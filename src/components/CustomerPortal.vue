@@ -1,21 +1,24 @@
 <template>
   <div class="customer-portal">
     <n-scrollbar>
-      <div class="content" :class="{ hidden: readyState < 4 }">
-      <div class="view view-subscriptions">
-        <Subscriptions :bridge="bridge" @ready="readyState++" />
+      <div class="content" :class="{ hidden: readyState < readyThreshold }">
+      <div 
+        v-if="!hideSubscriptions"
+        class="view view-subscriptions"
+      >
+        <Subscriptions :bridge="bridge" @ready="readyState++" :localization="localization" />
       </div>
       <div class="view view-payment-methods">
-        <PaymentMethods :bridge="bridge" :success-url="checkoutSessionSuccessUrl" :cancel-url="checkoutSessionCancelUrl" @ready="readyState++" :stripe-publishable-api-key="stripePublishableApiKey" />
+        <PaymentMethods ref="paymentMethods" :bridge="bridge" :success-url="checkoutSessionSuccessUrl" :cancel-url="checkoutSessionCancelUrl" @ready="readyState++" :stripe-publishable-api-key="stripePublishableApiKey" :localization="localization" />
       </div>
       <div class="view view-customer">
-        <CustomerAddress :bridge="bridge" @ready="readyState++" />
+        <CustomerAddress :bridge="bridge" @ready="readyState++" :localization="localization" />
       </div>
-      <div class="view view-customer">
-        <Invoices :bridge="bridge" @ready="readyState++" />
+      <div class="view view-invoices">
+        <Invoices :bridge="bridge" @ready="readyState++" :localization="localization" />
       </div>
     </div>
-    <div v-if="readyState < 4" class="spinner-wrapper">
+    <div v-if="(readyState < readyThreshold)" class="spinner-wrapper">
       <n-spin />
     </div>
     </n-scrollbar>
@@ -28,17 +31,34 @@ import CustomerAddress from './controls/CustomerAddress.vue'
 import PaymentMethods from './controls/PaymentMethods.vue'
 import Subscriptions from './controls/Subscriptions.vue'
 import Invoices from './controls/Invoices.vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { NSpin, NScrollbar } from 'naive-ui'
+import useInvoices from '../services/invoices'
+
+const paymentMethods = ref();
+function createCheckoutSession() {
+  paymentMethods?.value?.createCheckoutSession();
+}
 
 const props = defineProps<{
   bridge: StripeBridge;
   checkoutSessionSuccessUrl: string;
   checkoutSessionCancelUrl: string;
   stripePublishableApiKey: string;
+  hideSubscriptions?: boolean;
+  localization?: {
+    [key: string]: string;
+  };
 }>();
 
+const { fetchInvoices } = useInvoices(props.bridge);
+defineExpose({
+  createCheckoutSession,
+  fetchInvoices
+});
+
 const readyState = ref(0);
+const readyThreshold = computed(() => props.hideSubscriptions ? 3 : 4);
 
 </script>
 

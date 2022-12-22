@@ -2,13 +2,13 @@
   <div class="payment-methods control">
     <header>
       <n-h3>
-        Payment Methods
+        {{ props.localization?.['payment-methods'] ?? 'Payment Methods'}}
       </n-h3>
       
     </header>
     <n-divider />
     <n-spin :show="paymentMethodsFetching">
-      <n-empty v-if="paymentMethods && paymentMethods.length === 0" description="No payment methods">
+      <n-empty v-if="paymentMethods && paymentMethods.length === 0" :description="props.localization?.['payment-methods-empty'] ?? 'No payment methods'">
         <template #icon>
           <n-icon>
             <card-outline />
@@ -16,9 +16,9 @@
         </template>
       </n-empty>
       <n-list class="payment-methods-list">
-        <PaymentMethod v-for="{ id, billing_details, card, type, created } in paymentMethods" :key="id" :card="card">
+        <PaymentMethod v-for="{ id, billing_details, card, type, created } in paymentMethods" :key="id" :card="card" :localization="localization">
           <template #tags>
-            <n-tag v-if="customer?.invoice_settings.default_payment_method === id" type="success">Default</n-tag>
+            <n-tag v-if="customer?.invoice_settings.default_payment_method === id" type="success">{{props.localization?.['default'] ?? 'Default'}}</n-tag>
           </template>
           <template #actions>
             <n-button circle size="small" quaternary type="error" @click="triggerPaymentMethodDeletion(id)">
@@ -53,13 +53,13 @@
             </div>
             
           </n-popup> -->
-          <n-button round type="success" :disabled="creatingCheckoutSession" @click="createCheckoutSession">
+          <n-button ghost round type="success" :loading="creatingCheckoutSession" :disabled="creatingCheckoutSession" @click="createCheckoutSession">
             <template #icon>
               <n-icon>
                 <add-outline />
               </n-icon>
             </template>
-            Add Payment Method
+            {{ props.localization?.['add-payment-method'] ?? 'Add Payment Method'}}
           </n-button>
         </n-spin>
       </div>
@@ -92,11 +92,13 @@ const props = defineProps<{
   successUrl: string;
   cancelUrl: string;
   stripePublishableApiKey: string;
+  localization?: {
+    [key: string]: string;
+  };
 }>();
 const emit = defineEmits(['ready']);
 
 initStripe(props.stripePublishableApiKey);
-
 
 const dialog = useDialog();
 
@@ -110,11 +112,9 @@ const { createSession } = useCheckout(props.bridge);
 const setupIntent = ref<Stripe.SetupIntent>();
 
 const showAddView = ref(false);
-watch(showAddView, async newState => {
+watch(showAddView, async (newState: any) => {
   if (newState) {
     setupIntent.value = await createSetupIntent('off_session');
-    
-    
   }
 });
 
@@ -128,6 +128,10 @@ const createCheckoutSession = async () => {
     window.location.href = checkoutSession.value.url;
   }
 }
+
+defineExpose({
+  createCheckoutSession,
+});
 
 
 // const address = computed({
@@ -144,10 +148,6 @@ const createCheckoutSession = async () => {
 fetchPaymentMethods('card').then(() => {
   emit('ready');
 });
-
-// if (paymentMethods.value && paymentMethods.value[0]?.card?.brand === '') {
-  
-// }
 
 
 const editMode = ref(false);
@@ -166,9 +166,9 @@ const makeDefault = async (paymentMethodId: string) => {
 
 const triggerPaymentMethodDeletion = (paymentMethodId: string) => {
   const deletionDialog = dialog.error({
-    title: 'Delete Payment Method',
-    positiveText: 'Delete',
-    content: 'This will delete the payment method an all realted data.',
+    title: props.localization?.['delete-payment-method-dialog-title'] ?? 'Delete Payment Method',
+    positiveText: props.localization?.['delete-payment-method-dialog-positive'] ?? 'Delete',
+    content: props.localization?.['delete-payment-method-dialog-content'] ?? 'This will delete the payment method an all realted data.',
     async onPositiveClick() {
       deletePaymentMethod(paymentMethodId);
       deletionDialog.destroy();

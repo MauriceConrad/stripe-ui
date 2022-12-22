@@ -2,7 +2,7 @@
   <div class="subscriptions control">
     <header>
       <n-h3>
-        Subscriptions
+        {{ props.localization?.['sub'] ?? 'Subscriptions'}}
       </n-h3>
       
     </header>
@@ -25,11 +25,11 @@
                     <close-outline />
                   </n-icon>
                 </template>
-                Cancel
+                {{props.localization?.['cancel'] ?? 'Cancel'}}
               </n-button>
             </n-space>
           </template>
-          <n-popover v-if="Object.keys(metadata).length > 0" trigger="click">
+          <n-popover v-if="showMetadata && Object.keys(metadata).length > 0" trigger="click">
             <template #trigger>
               <n-button text size="tiny">
                 Metadata
@@ -59,7 +59,7 @@
               {{ plan.amount ? toPriceStr(plan.amount / 100, plan.currency) : '?' }}
             </div>
             <div class="description">
-              per {{ plan.interval }}
+              {{ props.localization?.['per'] ?? 'per'}} {{ plan.interval }}
             </div>
           </div>
           <div class="status">
@@ -96,6 +96,10 @@ import { toPriceStr } from '../../util/helpers'
 
 const props = defineProps<{
   bridge: StripeBridge;
+  showMetadata?: boolean;
+  localization?: {
+    [key: string]: string;
+  };
 }>();
 const emit = defineEmits(['ready']);
 
@@ -116,15 +120,14 @@ Promise.all([fetchCustomer(), fetchSubscriptions()]).then(() => {
 
 const editMode = ref(false);
 const save = async () => {
-  
   editMode.value = false;
 }
 
 const triggerCanceling = (subscriptionId: string) => {
   const cancelDialog = dialog.error({
-    title: 'Cancel the subscription?',
-    content: 'All related services and products will stop working to the end of the current billing period.',
-    positiveText: 'Cancel Subscription',
+    title: props.localization?.['cancel-dialog-title'] ?? 'Cancel the subscription?',
+    content: props.localization?.['cancel-dialog-content'] ?? 'All related services and products will stop working to the end of the current billing period.',
+    positiveText: props.localization?.['cancel-dialog-positive'] ?? 'Cancel Subscription',
     onPositiveClick() {
       deleteSubscription(subscriptionId);
       cancelDialog.destroy();
