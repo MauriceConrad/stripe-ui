@@ -60,7 +60,7 @@
         </tr>
       </table>
       <n-space class="actions" vertical>
-        <n-popup v-model:show="editMode" title="Edit Address" :type="isMobile ? 'layer' : 'frame'" :fixed-width="isMobile ? false : 800" :fixed-height="isMobile ? false : 660">
+        <n-popup v-model:show="editMode" title="Edit Address" :type="isMobile ? 'layer' : 'frame'" :fixed-width="isMobile ? false : 800" :fixed-height="isMobile ? false : 750">
           <template #trigger>
             <n-button round tertiary size="medium">
               <template #icon>
@@ -133,6 +133,7 @@ import { CreateOutline, ArrowBackOutline, SaveOutline } from '@vicons/ionicons5'
 import { NPopup } from 'naive-tools'
 import 'naive-tools/style.css'
 import useScreen from '../../util/screen'
+import Stripe from 'stripe'
 
 const props = defineProps<{
   bridge: StripeBridge;
@@ -183,6 +184,17 @@ const save = async () => {
     if (errors) {
       return;
     }
+    if(!customer.value) throw new Error('No customer');
+    customer.value.name = formData.name;
+    customer.value.email = formData.mail;
+    customer.value.phone = formData.phone;
+    customer.value.address = {
+      line1: formData.street,
+      line2: formData.address2,
+      postal_code: formData.zip,
+      city: formData.city,
+      state: formData.state,
+    } as Stripe.Address;
     updateCustomer().then(() => {
       editMode.value = false;
     });

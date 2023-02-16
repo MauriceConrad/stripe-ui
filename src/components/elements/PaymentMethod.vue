@@ -74,7 +74,7 @@ const cardIcons = {
         gap: .25rem;
         .line1 {
           display: flex;
-          justify-content: start;
+          justify-content: flex-start;
           align-items: center;
           gap: .25rem;
           .icon {
@@ -90,7 +90,7 @@ const cardIcons = {
         }
         .line2 {
           display: flex;
-          justify-content: start;
+          justify-content: flex-start;
           align-items: center;
           gap: .25rem;
           .tags {

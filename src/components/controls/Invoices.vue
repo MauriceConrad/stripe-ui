@@ -16,7 +16,7 @@
         </template>
       </n-empty>
       <n-list v-else class="invoices-list">
-        <n-list-item v-for="{ created, id, total, status, hosted_invoice_url, invoice_pdf, lines, currency }, index in invoices?.[page - 1]" :key="id">
+        <n-list-item v-for="{ created, id, total, status, hosted_invoice_url, invoice_pdf, lines, currency, discount }, index in invoices?.[page - 1]" :key="id">
           <n-card class="invoice-item">
             <div class="lines">
               <div>
@@ -32,7 +32,21 @@
                   {{ toPriceStr(total / 100, currency, 'de-DE') }}
                 </div>
                 <div class="tags">
-                  <n-tag :type="status === 'paid' ? 'success' : 'error'">{{ props.localization?.[status ?? ''] ?? status }}</n-tag>
+                  <n-tag round :type="status === 'paid' ? 'success' : 'error'">{{ props.localization?.[status ?? ''] ?? status }}</n-tag>
+                  <n-popover v-if="discount">
+                    <template #trigger>
+                      <n-tag round type="info">
+                        {{ props.localization?.['coupon-applied'] ?? 'Coupon applied' }}
+                      </n-tag>
+                    </template>
+                    <span v-if="discount.coupon.amount_off">
+                      -{{ toPriceStr(discount.coupon.amount_off / 100, currency, 'de-DE') }}
+                    </span>
+                    <span v-if="discount.coupon.percent_off">
+                      -{{ discount.coupon.percent_off }}%
+                    </span>
+                    <span>"{{ discount?.coupon.name }}"</span>
+                  </n-popover>
                 </div>
               </div>
             </div>
@@ -75,7 +89,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { StripeBridge } from '../../types'
-import { NDivider, NH3, NButton, NSpin, NList, NListItem, NTag, NSpace, NIcon, NEmpty, NCard, NPagination } from 'naive-ui'
+import { NDivider, NH3, NButton, NSpin, NList, NListItem, NTag, NSpace, NIcon, NEmpty, NCard, NPagination, NPopover } from 'naive-ui'
 import useInvoices from '../../services/invoices'
 import { toPriceStr } from '../../util/helpers'
 import { CardOutline, DocumentTextOutline, DocumentAttachOutline } from '@vicons/ionicons5'
@@ -103,7 +117,6 @@ const invoices = computed(() => {
   }
   return null;
 });
-
 
 const loadMoreInvoices = () => {
   if (allInvoices.value) {
@@ -137,6 +150,10 @@ const payInvoice = (invoiceHostedUrl: string) => {
           .price {
             font-weight: 600;
             font-size: 1.1em;
+          }
+          .tags {
+            display: flex;
+            gap: .5rem;
           }
         }
       }

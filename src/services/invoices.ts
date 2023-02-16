@@ -50,7 +50,6 @@ export default function useInvoices(bridge: StripeBridge) {
     return __updateInvoice(bridge, paymentMethodId, paymentMethod);
   }
 
-
   return {
     invoices,
     fetchInvoices,

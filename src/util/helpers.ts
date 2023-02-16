@@ -21,6 +21,7 @@ export function toDateStr(date: number, onlyDate = false, locale = 'de-DE', isSe
     return new Date((date * 1000 * Number(isSecods))).toLocaleString(locale, { 'year': 'numeric', 'month': 'numeric', 'day': 'numeric', 'hour': 'numeric', 'minute': 'numeric' });
   }
 }
+
 export function toPriceStr(price: number, currency = 'EUR', locale = 'de-DE') {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
