@@ -7,6 +7,7 @@
       
     </header>
     <n-divider />
+    <p>BRUH</p>
     <n-spin :show="invoicesFetching">
       <n-empty v-if="invoices && invoices.length === 0" :description=" props.localization?.['invoices-empty'] ?? 'No invoices yet'">
         <template #icon>
@@ -15,7 +16,7 @@
           </n-icon>
         </template>
       </n-empty>
-      <n-list v-else class="invoices-list">
+      <n-list v-else class="invoices-list" :show-divider="false">
         <n-list-item v-for="{ created, id, total, status, hosted_invoice_url, invoice_pdf, lines, currency, discount }, index in invoices?.[page - 1]" :key="id">
           <n-card class="invoice-item">
             <div class="lines">
@@ -136,6 +137,7 @@ const payInvoice = (invoiceHostedUrl: string) => {
   .invoice-item {
     ::v-deep(.n-card__content) {
       display: flex;
+      gap: .5rem;
       align-items: center;
       .lines {
         flex-grow: 1;

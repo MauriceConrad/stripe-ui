@@ -21,12 +21,16 @@
             <n-tag v-if="customer?.invoice_settings.default_payment_method === id" type="success">{{props.localization?.['default'] ?? 'Default'}}</n-tag>
           </template>
           <template #actions>
-            <n-button circle size="small" quaternary type="error" @click="triggerPaymentMethodDeletion(id)">
+            <n-button v-if="customer?.invoice_settings.default_payment_method !== id" round ghost size="small" @click="makeDefault(id)">
+              {{ props.localization?.['make-default'] ?? 'Make default' }}
+            </n-button>
+            <n-button round ghost size="small" quaternary type="error" @click="triggerPaymentMethodDeletion(id)">
               <template #icon>
                 <n-icon>
                   <close-outline />
                 </n-icon>
               </template>
+              {{ props.localization?.['remove'] ?? 'Remove' }}
             </n-button>
           </template>
         </PaymentMethod>
@@ -109,14 +113,15 @@ const { customer, updateCustomer } = useCustomer(props.bridge);
 const { paymentMethods, paymentMethodsFetching, fetchPaymentMethods, createSetupIntent, updatePaymentMethod, deletePaymentMethod } = usePaymentMethods(props.bridge);
 const { createSession } = useCheckout(props.bridge);
 
-const setupIntent = ref<Stripe.SetupIntent>();
+// unused - maybe remove
+// const setupIntent = ref<Stripe.SetupIntent>();
 
-const showAddView = ref(false);
-watch(showAddView, async (newState: any) => {
-  if (newState) {
-    setupIntent.value = await createSetupIntent('off_session');
-  }
-});
+// const showAddView = ref(false);
+// watch(showAddView, async (newState: any) => {
+//   if (newState) {
+//     setupIntent.value = await createSetupIntent('off_session');
+//   }
+// });
 
 const creatingCheckoutSession = ref(false);
 const checkoutSession = ref<Stripe.Checkout.Session>();
@@ -133,7 +138,6 @@ defineExpose({
   createCheckoutSession,
 });
 
-
 // const address = computed({
 //   get() {
 //     return customer.value?.address;
@@ -143,18 +147,16 @@ defineExpose({
 //   }
 // })
 
-
-
 fetchPaymentMethods('card').then(() => {
   emit('ready');
 });
 
-
-const editMode = ref(false);
-const save = async () => {
-  //await updatePaymentMethod();
-  editMode.value = false;
-}
+// unused - maybe remove
+// const editMode = ref(false);
+// const save = async () => {
+//   //await updatePaymentMethod();
+//   editMode.value = false;
+// }
 
 const makeDefault = async (paymentMethodId: string) => {
   if (customer.value) {
@@ -176,10 +178,11 @@ const triggerPaymentMethodDeletion = (paymentMethodId: string) => {
   });
 }
 
-const onConfirmNewPaymentMethod = async () => {
-  fetchPaymentMethods('card');
-  showAddView.value = false;
-}
+// unused - maybe remove
+// const onConfirmNewPaymentMethod = async () => {
+//   fetchPaymentMethods('card');
+//   showAddView.value = false;
+// }
 
 
 </script>
