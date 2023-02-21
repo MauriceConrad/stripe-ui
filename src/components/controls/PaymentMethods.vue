@@ -108,7 +108,7 @@ const { paymentMethods: _paymentMethods, paymentMethodsFetching, fetchPaymentMet
 const { createSession } = useCheckout(props.bridge);
 
 const paymentMethods = computed(() => {
-  return sortBy(_paymentMethods.value, (pm) => customer.value?.invoice_settings.default_payment_method === pm.id) ?? [];
+  return sortBy(_paymentMethods.value, (pm) => customer.value?.invoice_settings.default_payment_method !== pm.id) ?? [];
 });
 
 // unused - maybe remove

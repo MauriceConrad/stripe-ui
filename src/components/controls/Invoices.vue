@@ -20,6 +20,9 @@
           <n-card class="invoice-item">
             <div class="lines">
               <div>
+                <div class="id">
+                  {{ id }}
+                </div>
                 <div class="date">
                   {{ new Date(created * 1000).toLocaleDateString(props.localization?.['locale'] ?? 'de-DE', { year: 'numeric', month: 'numeric', day: 'numeric' }) }}
                 </div>
@@ -60,7 +63,7 @@
                   </template>
                   {{props.localization?.['pay'] ?? 'Pay'}}
                 </n-button>
-                <n-button tag="a" :href="invoice_pdf" round tertiary>
+                <n-button v-if="id && invoice_pdf" @click="() => download(id, invoice_pdf)" round tertiary :loading="downloading.includes(id)">
                   <template #icon>
                     <n-icon>
                       <document-text-outline />
@@ -87,7 +90,7 @@
 
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { StripeBridge } from '../../types'
 import { NDivider, NH3, NButton, NSpin, NList, NListItem, NTag, NSpace, NIcon, NEmpty, NCard, NPagination, NPopover } from 'naive-ui'
 import useInvoices from '../../services/invoices'
@@ -126,6 +129,25 @@ const loadMoreInvoices = () => {
 
 const payInvoice = (invoiceHostedUrl: string) => {
 
+}
+
+const downloading = reactive([] as string[]);
+function download(id: string, file_URL: string) {
+  if (downloading.includes(id)) return;
+  downloading.push(id);
+  (async () => {
+    // fetch the file, create invisible link, click it, remove it
+    const res = await fetch(file_URL);
+    const blob = await res.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `invoice_${id}.pdf`;
+    a.click();
+    a.remove();
+    return;
+  })().finally(() => {
+    downloading.splice(downloading.indexOf(id), 1);
+  });
 }
 
 </script>
