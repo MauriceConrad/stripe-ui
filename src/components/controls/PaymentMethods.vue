@@ -19,13 +19,10 @@
         <PaymentMethod v-for="{ id, billing_details, card, type, created } in paymentMethods" :key="id" :card="card" :localization="localization">
           <template #tags>
             <n-tag v-if="customer?.invoice_settings.default_payment_method === id" type="success">{{props.localization?.['default'] ?? 'Default'}}</n-tag>
-            <!-- <n-button v-else round ghost size="small" @click="makeDefault(id)">
-              {{ props.localization?.['make-default'] ?? 'Make default' }}
-            </n-button> -->
           </template>
           <template #actions>
             <n-dropdown :options="options(id).value" @select="(key: string) => onSelect(key, id)">
-              <n-button quaternary :loading="loading">
+              <n-button circle quaternary :loading="loading">
                 <template #icon>
                   <n-icon>
                     <EllipsisVertical />
@@ -33,14 +30,6 @@
                 </template>
               </n-button>
             </n-dropdown>
-            <!-- <n-button round ghost size="small" type="error" @click="triggerPaymentMethodDeletion(id)">
-              <template #icon>
-                <n-icon>
-                  <close-outline />
-                </n-icon>
-              </template>
-              {{ props.localization?.['remove'] ?? 'Remove' }}
-            </n-button> -->
           </template>
         </PaymentMethod>
       </n-list>
@@ -205,7 +194,7 @@ const options = (id: string) => computed(() => {
     },
     {
       key: 'delete',
-      label: props.localization?.['delete'] ?? 'Delete',
+      label: props.localization?.['remove'] ?? 'Remove',
     }
   ] as DropdownOption[];
 })
@@ -234,7 +223,7 @@ function onSelect(key: string, id: string) {
 .payment-methods-list {
   display: flex;
   flex-direction: column;
-  gap: .25rem;
+  gap: .5rem;
 }
 
 .payment-actions {

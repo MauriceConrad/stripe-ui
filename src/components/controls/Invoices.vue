@@ -7,7 +7,6 @@
       
     </header>
     <n-divider />
-    <p>BRUH</p>
     <n-spin :show="invoicesFetching">
       <n-empty v-if="invoices && invoices.length === 0" :description=" props.localization?.['invoices-empty'] ?? 'No invoices yet'">
         <template #icon>
@@ -139,6 +138,8 @@ const payInvoice = (invoiceHostedUrl: string) => {
       display: flex;
       gap: .5rem;
       align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
       .lines {
         flex-grow: 1;
         display: flex;
