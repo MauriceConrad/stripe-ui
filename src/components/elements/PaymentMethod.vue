@@ -13,13 +13,13 @@
           </div>
         </div>
         <div class="line2">
-          <div class="tags">
-            <slot name="tags" />
-          </div>
           <div class="exp">
             <span v-if="showExpirationDate">
               {{ props.localization?.['expiration-date'] ?? 'Expiration Date'}}: {{ card?.exp_month }} / {{ card?.exp_year }}
             </span>
+          </div>
+          <div class="tags">
+            <slot name="tags" />
           </div>
         </div>
       </main>
@@ -103,8 +103,9 @@ const cardIcons = {
       }
       aside {
         display: flex;
-        flex-direction: column;
-        justify-content: center;
+        flex-wrap: wrap;
+        flex-direction: row;
+        align-items: center;
       }
     }
   }

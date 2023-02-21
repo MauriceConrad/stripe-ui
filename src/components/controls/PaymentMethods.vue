@@ -19,19 +19,28 @@
         <PaymentMethod v-for="{ id, billing_details, card, type, created } in paymentMethods" :key="id" :card="card" :localization="localization">
           <template #tags>
             <n-tag v-if="customer?.invoice_settings.default_payment_method === id" type="success">{{props.localization?.['default'] ?? 'Default'}}</n-tag>
+            <!-- <n-button v-else round ghost size="small" @click="makeDefault(id)">
+              {{ props.localization?.['make-default'] ?? 'Make default' }}
+            </n-button> -->
           </template>
           <template #actions>
-            <n-button v-if="customer?.invoice_settings.default_payment_method !== id" round ghost size="small" @click="makeDefault(id)">
-              {{ props.localization?.['make-default'] ?? 'Make default' }}
-            </n-button>
-            <n-button round ghost size="small" quaternary type="error" @click="triggerPaymentMethodDeletion(id)">
+            <n-dropdown :options="options(id).value" @select="(key: string) => onSelect(key, id)">
+              <n-button>
+                <template #icon>
+                  <n-icon>
+                    <EllipsisVertical />
+                  </n-icon>
+                </template>
+              </n-button>
+            </n-dropdown>
+            <!-- <n-button round ghost size="small" type="error" @click="triggerPaymentMethodDeletion(id)">
               <template #icon>
                 <n-icon>
                   <close-outline />
                 </n-icon>
               </template>
               {{ props.localization?.['remove'] ?? 'Remove' }}
-            </n-button>
+            </n-button> -->
           </template>
         </PaymentMethod>
       </n-list>
@@ -75,20 +84,15 @@
 <script setup lang="ts">
 import type { StripeBridge } from '../../types'
 import usePaymentMethods from '../../services/paymentMethods'
-import { computed, ref, watch, watchEffect } from 'vue'
-import propToComputed from '../../controllers/propToComputed'
-import { NButton, NIcon, NForm, NFormItem, NEmpty, NDivider, NH3, NInput, NSpace, NSpin, NList, NListItem, NTag, useDialog } from 'naive-ui'
-import { CreateOutline, ArrowBackOutline, SaveOutline, TrashOutline, CardOutline, CloseOutline, AddOutline } from '@vicons/ionicons5'
-// @ts-expect-error no types
-import { NPopup } from 'naive-tools'
+import { computed, h, ref } from 'vue'
+import { NButton, NIcon, NEmpty, NDivider, NH3, NSpin, NList, NTag, useDialog, NDropdown, DropdownOption, MenuOption } from 'naive-ui'
+import { EllipsisVertical, CardOutline, CloseOutline, AddOutline } from '@vicons/ionicons5'
 import 'naive-tools/style.css'
 import useScreen from '../../util/screen'
 import useCustomer from '../../services/customer'
 import useCheckout from '../../services/checkout'
 import Stripe from 'stripe'
-import { StripeElement, StripeElements } from '@stripe/stripe-js'
-import stripe, { initStripe } from '../../services/stripe'
-import SetupIntent from './SetupIntent.vue'
+import { initStripe } from '../../services/stripe'
 import PaymentMethod from '../elements/PaymentMethod.vue'
 
 const props = defineProps<{
@@ -184,6 +188,31 @@ const triggerPaymentMethodDeletion = (paymentMethodId: string) => {
 //   showAddView.value = false;
 // }
 
+const options = (id: string) => computed(() => {
+  return [
+    {
+      key: 'make-default',
+      label: props.localization?.['make-default'] ?? 'Make Default',
+      disabled: customer.value?.invoice_settings.default_payment_method === id,
+    },
+    {
+      key: 'delete',
+      label: props.localization?.['delete'] ?? 'Delete',
+      icon: h(CloseOutline),
+    }
+  ] as DropdownOption[];
+})
+
+function onSelect(key: string, id: string) {
+  switch(key) {
+    case 'make-default':
+      makeDefault(id);
+      break;
+    case 'delete':
+      triggerPaymentMethodDeletion(id);
+      break;
+  }
+} 
 
 </script>
 
