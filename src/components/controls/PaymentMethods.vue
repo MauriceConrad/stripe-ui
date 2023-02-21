@@ -25,7 +25,7 @@
           </template>
           <template #actions>
             <n-dropdown :options="options(id).value" @select="(key: string) => onSelect(key, id)">
-              <n-button>
+              <n-button quaternary :loading="loading">
                 <template #icon>
                   <n-icon>
                     <EllipsisVertical />
@@ -94,6 +94,7 @@ import useCheckout from '../../services/checkout'
 import Stripe from 'stripe'
 import { initStripe } from '../../services/stripe'
 import PaymentMethod from '../elements/PaymentMethod.vue'
+import { sortBy } from 'lodash'
 
 const props = defineProps<{
   bridge: StripeBridge;
@@ -114,8 +115,12 @@ const screen = useScreen();
 const isMobile = computed(() => screen.width <= 600);
 
 const { customer, updateCustomer } = useCustomer(props.bridge);
-const { paymentMethods, paymentMethodsFetching, fetchPaymentMethods, createSetupIntent, updatePaymentMethod, deletePaymentMethod } = usePaymentMethods(props.bridge);
+const { paymentMethods: _paymentMethods, paymentMethodsFetching, fetchPaymentMethods, createSetupIntent, updatePaymentMethod, deletePaymentMethod } = usePaymentMethods(props.bridge);
 const { createSession } = useCheckout(props.bridge);
+
+const paymentMethods = computed(() => {
+  return sortBy(_paymentMethods.value, (pm) => customer.value?.invoice_settings.default_payment_method === pm.id) ?? [];
+});
 
 // unused - maybe remove
 // const setupIntent = ref<Stripe.SetupIntent>();
@@ -176,7 +181,10 @@ const triggerPaymentMethodDeletion = (paymentMethodId: string) => {
     positiveText: props.localization?.['delete-payment-method-dialog-positive'] ?? 'Delete',
     content: props.localization?.['delete-payment-method-dialog-content'] ?? 'This will delete the payment method an all realted data.',
     async onPositiveClick() {
-      deletePaymentMethod(paymentMethodId);
+      loading.value = true;
+      deletePaymentMethod(paymentMethodId).finally(() => {
+        loading.value = false;
+      })
       deletionDialog.destroy();
     }
   });
@@ -198,15 +206,18 @@ const options = (id: string) => computed(() => {
     {
       key: 'delete',
       label: props.localization?.['delete'] ?? 'Delete',
-      icon: h(CloseOutline),
     }
   ] as DropdownOption[];
 })
 
+const loading = ref(false);
 function onSelect(key: string, id: string) {
   switch(key) {
     case 'make-default':
-      makeDefault(id);
+      loading.value = true;
+      makeDefault(id).finally(() => {
+        loading.value = false;
+      })
       break;
     case 'delete':
       triggerPaymentMethodDeletion(id);
@@ -219,6 +230,12 @@ function onSelect(key: string, id: string) {
 <style scoped lang="scss">
 @import "../../style/control.scss";
 @import "../../style/spinner.scss";
+
+.payment-methods-list {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
 
 .payment-actions {
   padding: 20px 0;
