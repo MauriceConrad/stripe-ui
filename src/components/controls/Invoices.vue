@@ -20,9 +20,9 @@
           <n-card class="invoice-item">
             <div class="lines">
               <div>
-                <div class="id">
+                <!-- <div class="id">
                   {{ id }}
-                </div>
+                </div> -->
                 <div class="date">
                   {{ new Date(created * 1000).toLocaleDateString(props.localization?.['locale'] ?? 'de-DE', { year: 'numeric', month: 'numeric', day: 'numeric' }) }}
                 </div>
