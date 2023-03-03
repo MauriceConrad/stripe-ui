@@ -137,7 +137,9 @@ function download(id: string, file_URL: string) {
   downloading.push(id);
   (async () => {
     // fetch the file, create invisible link, click it, remove it
-    const res = await fetch(file_URL);
+    const res = await fetch(file_URL, {
+      mode: 'no-cors',
+    });
     const blob = await res.blob();
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
