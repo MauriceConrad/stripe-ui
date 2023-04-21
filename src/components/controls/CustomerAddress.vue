@@ -7,8 +7,8 @@
     </header>
     <n-divider />
     <n-spin :show="customerFetching">
-      <n-alert v-if="incomplete" :title="props.localization?.['inclomplete'] ?? 'Incomplete'" type="error">
-        {{ props.localization?.["inclomplete-description"] ?? "Please complete your billing information." }}
+      <n-alert v-if="incomplete" :title="props.localization?.['incomplete'] ?? 'Incomplete'" type="error">
+        {{ props.localization?.["incomplete-description"] ?? "Please complete your billing information." }}
       </n-alert>
       <table class="data-table">
         <tr>
