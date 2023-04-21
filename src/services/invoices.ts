@@ -1,6 +1,6 @@
-import { ref } from 'vue'
-import Stripe from 'stripe'
-import { StripeBridge } from '../types';
+import { ref } from "vue";
+import Stripe from "stripe";
+import { StripeBridge } from "../types";
 
 const invoices = ref<Stripe.Invoice[]>();
 const invoicesFetching = ref(false);
@@ -8,22 +8,30 @@ const paymentMethodsUpdating = ref(false);
 
 export async function __fetchInvoices(bridge: StripeBridge, startingAfter?: string) {
   invoicesFetching.value = true;
+  let hasMore = false;
   if (startingAfter && invoices.value) {
     const startingAfterInvoice = invoices.value.find(({ id }) => id === startingAfter);
     const startingAfterInvoiceIndex = startingAfterInvoice ? invoices.value.indexOf(startingAfterInvoice) : 0;
-    invoices.value = [
-      ...invoices.value?.slice(0, startingAfterInvoiceIndex),
-      ...await bridge.invoices.list(startingAfter)
-    ]
-  }
-  else {
-    invoices.value = await bridge.invoices.list();
+    const res = await bridge.invoices.list(startingAfter);
+    hasMore = res.has_more;
+    invoices.value = [...invoices.value?.slice(0, startingAfterInvoiceIndex), ...res.data];
+  } else {
+    const res = await bridge.invoices.list();
+    invoices.value = res.data;
+    hasMore = res.has_more;
   }
   invoicesFetching.value = false;
-  return invoices.value;
+  return {
+    invoices: invoices.value,
+    hasMore,
+  };
 }
 
-export async function __updateInvoice(bridge: StripeBridge, paymentMethodId: string, paymentMethod: Partial<Stripe.PaymentMethod>) {
+export async function __updateInvoice(
+  bridge: StripeBridge,
+  paymentMethodId: string,
+  paymentMethod: Partial<Stripe.PaymentMethod>
+) {
   if (invoices.value) {
     paymentMethodsUpdating.value = true;
     await bridge.paymentMethods.set(paymentMethodId, paymentMethod);
@@ -34,7 +42,6 @@ export async function __updateInvoice(bridge: StripeBridge, paymentMethodId: str
 export async function __createSetupIntent(bridge: StripeBridge, usage: Stripe.SetupIntentCreateParams.Usage) {
   return await bridge.setupIntent.create(usage);
 }
-
 
 export async function __deletePaymentMethod(bridge: StripeBridge, paymentMethodId: string) {
   invoices.value = invoices.value?.filter(({ id }) => id !== paymentMethodId);
@@ -54,6 +61,6 @@ export default function useInvoices(bridge: StripeBridge) {
     invoices,
     fetchInvoices,
     updateInvoice,
-    invoicesFetching
-  }
+    invoicesFetching,
+  };
 }

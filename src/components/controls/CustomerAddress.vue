@@ -2,16 +2,18 @@
   <div class="customer-address control">
     <header>
       <n-h3>
-        {{ props.localization?.['billing-contact'] ?? 'Address'}}
+        {{ props.localization?.["billing-contact"] ?? "Address" }}
       </n-h3>
-      
     </header>
     <n-divider />
     <n-spin :show="customerFetching">
+      <n-alert v-if="incomplete" :title="props.localization?.['inclomplete'] ?? 'Incomplete'" type="error">
+        {{ props.localization?.["inclomplete-description"] ?? "Please complete your billing information." }}
+      </n-alert>
       <table class="data-table">
         <tr>
           <td>
-            {{ props.localization?.['name'] ?? 'Name'}}
+            {{ props.localization?.["name"] ?? "Name" }}
           </td>
           <td>
             <span class="line">
@@ -21,7 +23,7 @@
         </tr>
         <tr>
           <td>
-            {{ props.localization?.['mail'] ?? 'Mail'}}
+            {{ props.localization?.["mail"] ?? "Mail" }}
           </td>
           <td>
             <span class="line">
@@ -31,7 +33,7 @@
         </tr>
         <tr>
           <td>
-            {{ props.localization?.['address'] ?? 'Address'}}
+            {{ props.localization?.["address"] ?? "Address" }}
           </td>
           <td>
             <span class="line">
@@ -40,8 +42,9 @@
             <span v-if="customer?.address?.line2" class="line">
               {{ customer?.address?.line2 }}
             </span>
-            <span v-if="(customer?.address?.city || customer?.address?.postal_code)" class="line">
-              <span v-if="customer?.address?.postal_code">{{ customer?.address?.postal_code }}</span>, <span v-if="customer?.address?.city">{{ customer?.address?.city }}</span>
+            <span v-if="customer?.address?.city || customer?.address?.postal_code" class="line">
+              <span v-if="customer?.address?.postal_code">{{ customer?.address?.postal_code }}</span
+              >, <span v-if="customer?.address?.city">{{ customer?.address?.city }}</span>
             </span>
             <span v-if="customer?.address?.state" class="line">
               {{ customer?.address?.state }}
@@ -50,7 +53,7 @@
         </tr>
         <tr>
           <td>
-            {{ props.localization?.['phone'] ?? 'Phone'}}
+            {{ props.localization?.["phone"] ?? "Phone" }}
           </td>
           <td>
             <span class="line">
@@ -60,7 +63,13 @@
         </tr>
       </table>
       <n-space class="actions" vertical>
-        <n-popup v-model:show="editMode" title="Edit Address" :type="isMobile ? 'layer' : 'frame'" :fixed-width="isMobile ? false : 800" :fixed-height="isMobile ? false : 750">
+        <n-popup
+          v-model:show="editMode"
+          :title="props.localization?.['edit-contact'] ?? 'Edit Address'"
+          :type="isMobile ? 'layer' : 'frame'"
+          :fixed-width="isMobile ? false : 800"
+          :fixed-height="isMobile ? false : 750"
+        >
           <template #trigger>
             <n-button round tertiary size="medium">
               <template #icon>
@@ -68,39 +77,68 @@
                   <create-outline />
                 </n-icon>
               </template>
-              {{ props.localization?.['edit'] ?? 'Edit'}}
+              {{ props.localization?.["edit"] ?? "Edit" }}
             </n-button>
           </template>
           <div class="popup-inner">
             <n-spin :show="customerUpdating">
-              <n-form :model="formData" :rules="rules" ref="formRef" label-placement="top" require-mark-placement="right-hanging" label-width="auto">
-                <n-form-item :label=" props.localization?.['name'] ?? 'Name'" path="name">
-                  <n-input v-model:value="formData.name" :placeholder=" props.localization?.['name'] ?? 'name'" />
+              <n-form
+                :model="formData"
+                :rules="rules"
+                ref="formRef"
+                label-placement="top"
+                require-mark-placement="right-hanging"
+                label-width="auto"
+              >
+                <n-form-item :label="props.localization?.['name'] ?? 'Name'" path="name">
+                  <n-input v-model:value="formData.name" :placeholder="props.localization?.['name'] ?? 'name'" />
                 </n-form-item>
                 <div class="form-flex-grid">
-                  <n-form-item :label=" props.localization?.['mail'] ?? 'Mail'" path="mail">
-                    <n-input v-model:value="formData.mail" :placeholder=" props.localization?.['mail'] ?? 'e-mail'" :input-props="{ type: 'email' }" />
+                  <n-form-item :label="props.localization?.['mail'] ?? 'Mail'" path="mail">
+                    <n-input
+                      v-model:value="formData.mail"
+                      :placeholder="props.localization?.['mail'] ?? 'e-mail'"
+                      :input-props="{ type: 'email' }"
+                    />
                   </n-form-item>
-                  <n-form-item :label=" props.localization?.['phone'] ?? 'Phone'" path="phone">
-                    <n-input v-model:value="formData.phone" :placeholder=" props.localization?.['phone'] ?? 'phone'" :input-props="{ type: 'phone' }" />
+                  <n-form-item :label="props.localization?.['phone'] ?? 'Phone'" path="phone">
+                    <n-input
+                      v-model:value="formData.phone"
+                      :placeholder="props.localization?.['phone'] ?? 'phone'"
+                      :input-props="{ type: 'phone' }"
+                    />
                   </n-form-item>
                 </div>
-                <n-form-item :label=" props.localization?.['street'] ?? 'Address line 1'" path="street">
-                  <n-input v-model:value="formData.street" :placeholder=" props.localization?.['street'] ?? 'Address line 1'" />
+                <n-form-item :label="props.localization?.['street'] ?? 'Address line 1'" path="street">
+                  <n-input
+                    v-model:value="formData.street"
+                    :placeholder="props.localization?.['street'] ?? 'Address line 1'"
+                  />
                 </n-form-item>
-                <n-form-item :label=" props.localization?.['address-line-2'] ?? 'Address line 2'" path="address2">
-                  <n-input v-model:value="formData.address2" :placeholder=" props.localization?.['address-line-2'] ?? 'Address line 2'" />
+                <n-form-item :label="props.localization?.['address-line-2'] ?? 'Address line 2'" path="address2">
+                  <n-input
+                    v-model:value="formData.address2"
+                    :placeholder="props.localization?.['address-line-2'] ?? 'Address line 2'"
+                  />
                 </n-form-item>
                 <div class="form-flex-grid">
-                  <n-form-item :label=" props.localization?.['zip'] ?? 'Postal Code'" path="zip">
-                  <n-input v-model:value="formData.zip" :placeholder=" props.localization?.['zip'] ?? 'postal code'" />
-                </n-form-item>
-                <n-form-item :label=" props.localization?.['city'] ?? 'City'" path="city">
-                  <n-input v-model:value="formData.city" :placeholder=" props.localization?.['city'] ?? 'city'" />
-                </n-form-item>
+                  <n-form-item :label="props.localization?.['zip'] ?? 'Postal Code'" path="zip">
+                    <n-input v-model:value="formData.zip" :placeholder="props.localization?.['zip'] ?? 'postal code'" />
+                  </n-form-item>
+                  <n-form-item :label="props.localization?.['city'] ?? 'City'" path="city">
+                    <n-input v-model:value="formData.city" :placeholder="props.localization?.['city'] ?? 'city'" />
+                  </n-form-item>
                 </div>
-                <n-form-item :label=" props.localization?.['state'] ?? 'State'" path="state">
-                  <n-input v-model:value="formData.state" :placeholder=" props.localization?.['state'] ?? 'state'" />
+                <n-form-item :label="props.localization?.['country'] ?? 'Country'" path="country">
+                  <n-select
+                    v-model:value="formData.country"
+                    filterable
+                    :placeholder="props.localization?.['country'] ?? 'country'"
+                    :options="countries"
+                  />
+                </n-form-item>
+                <n-form-item :label="props.localization?.['state'] ?? 'State'" path="state">
+                  <n-input v-model:value="formData.state" :placeholder="props.localization?.['state'] ?? 'state'" />
                 </n-form-item>
               </n-form>
               <div class="form-actions">
@@ -110,7 +148,7 @@
                       <save-outline />
                     </n-icon>
                   </template>
-                  {{ props.localization?.['save'] ?? 'Save'}}
+                  {{ props.localization?.["save"] ?? "Save" }}
                 </n-button>
               </div>
             </n-spin>
@@ -121,27 +159,44 @@
   </div>
 </template>
 
-
 <script setup lang="ts">
-import type { StripeBridge } from '../../types'
-import useCustomer from '../../services/customer'
-import { computed, reactive, ref, watch } from 'vue'
-import propToComputed from '../../controllers/propToComputed'
-import { NButton, NIcon, NForm, NFormItem, NDivider, NH3, NInput, NSpace, NSpin, FormItemRule, FormRules, FormInst, FormValidationError } from 'naive-ui'
-import { CreateOutline, ArrowBackOutline, SaveOutline } from '@vicons/ionicons5'
+import type { StripeBridge } from "../../types";
+import useCustomer from "../../services/customer";
+import { computed, reactive, ref, watch } from "vue";
+import propToComputed from "../../controllers/propToComputed";
+import {
+  NButton,
+  NIcon,
+  NForm,
+  NFormItem,
+  NDivider,
+  NH3,
+  NInput,
+  NSpace,
+  NSpin,
+  FormItemRule,
+  FormRules,
+  FormInst,
+  FormValidationError,
+  NSelect,
+  SelectOption,
+  NAlert,
+} from "naive-ui";
+import { CreateOutline, ArrowBackOutline, SaveOutline } from "@vicons/ionicons5";
 // @ts-expect-error no types
-import { NPopup } from 'naive-tools'
-import 'naive-tools/style.css'
-import useScreen from '../../util/screen'
-import Stripe from 'stripe'
+import { NPopup } from "naive-tools";
+import "naive-tools/style.css";
+import useScreen from "../../util/screen";
+import Stripe from "stripe";
 
 const props = defineProps<{
   bridge: StripeBridge;
+  locale?: string;
   localization?: {
     [key: string]: string;
   };
 }>();
-const emit = defineEmits(['ready']);
+const emit = defineEmits(["ready", "saved"]);
 
 const screen = useScreen();
 const isMobile = computed(() => screen.width <= 600);
@@ -149,42 +204,54 @@ const isMobile = computed(() => screen.width <= 600);
 const { customer, fetchCustomer, updateCustomer, customerUpdating, customerFetching } = useCustomer(props.bridge);
 
 watch(customer, (nv) => {
-  if(nv) {
-    formData.name = nv.name ?? '';
-    formData.mail = nv.email ?? '';
-    formData.phone = nv.phone ?? '';
-    formData.state = nv.address?.line1 ?? '';
-    formData.address2 = nv.address?.line2 ?? '';
-    formData.zip = nv.address?.postal_code ?? '';
-    formData.city = nv.address?.city ?? '';
-    formData.state = nv.address?.state ?? '';
+  if (nv) {
+    formData.name = nv.name ?? "";
+    formData.mail = nv.email ?? "";
+    formData.phone = nv.phone ?? "";
+    formData.street = nv.address?.line1 ?? "";
+    formData.address2 = nv.address?.line2 ?? "";
+    formData.zip = nv.address?.postal_code ?? "";
+    formData.city = nv.address?.city ?? "";
+    formData.country = nv.address?.country ?? "";
+    formData.state = nv.address?.state ?? "";
   }
-})
+});
+
+const incomplete = computed(() => {
+  return (
+    !customer.value?.name ||
+    !customer.value?.email ||
+    !customer.value?.address?.line1 ||
+    !customer.value?.address?.city ||
+    !customer.value?.address?.postal_code ||
+    !customer.value?.address?.country
+  );
+});
 
 const formData = reactive({
-  name: '',
-  mail: '',
-  phone: '',
-  street: '',
-  address2: '',
-  zip: '',
-  city: '',
-  state: '',
-})
+  name: "",
+  mail: "",
+  phone: "",
+  street: "",
+  address2: "",
+  zip: "",
+  city: "",
+  country: "",
+  state: "",
+});
 
 fetchCustomer().then(() => {
-  emit('ready');
+  emit("ready");
 });
 
 const editMode = ref(false);
-const formRef = ref<FormInst | null>(null)
+const formRef = ref<FormInst | null>(null);
 const save = async () => {
-  formRef.value?.validate(
-  (errors: Array<FormValidationError> | undefined) => {
+  formRef.value?.validate((errors: Array<FormValidationError> | undefined) => {
     if (errors) {
       return;
     }
-    if(!customer.value) throw new Error('No customer');
+    if (!customer.value) throw new Error("No customer");
     customer.value.name = formData.name;
     customer.value.email = formData.mail;
     customer.value.phone = formData.phone;
@@ -194,56 +261,90 @@ const save = async () => {
       postal_code: formData.zip,
       city: formData.city,
       state: formData.state,
+      country: formData.country,
     } as Stripe.Address;
     updateCustomer().then(() => {
       editMode.value = false;
+      emit("saved");
     });
   });
-}
+};
 
 const rules: FormRules = {
-    name: {
-      required: true,
-      trigger: 'blur',
-      validator: (rule: FormItemRule, value: string) => {
-        if(!value) return Error( props.localization?.['name-required'] ?? 'Name is required');
-        return true;
-      }
+  name: {
+    required: true,
+    trigger: "blur",
+    validator: (rule: FormItemRule, value: string) => {
+      if (!value) return Error(props.localization?.["name-required"] ?? "Name is required");
+      return true;
     },
-    mail: {
-      required: true,
-      trigger: 'blur',
-      validator: (rule: FormItemRule, value: string) => {
-        if(!value) return Error( props.localization?.['mail-required'] ?? 'EMail is required');
-        return true;
-      }
+  },
+  mail: {
+    required: true,
+    trigger: "blur",
+    validator: (rule: FormItemRule, value: string) => {
+      if (!value) return Error(props.localization?.["mail-required"] ?? "EMail is required");
+      return true;
     },
-    street: {
-      required: true,
-      trigger: 'blur',
-      validator: (rule: FormItemRule, value: string) => {
-        if(!value) return Error( props.localization?.['street-required'] ?? 'Address Line 1 is required');
-        return true;
-      }
+  },
+  street: {
+    required: true,
+    trigger: "blur",
+    validator: (rule: FormItemRule, value: string) => {
+      if (!value) return Error(props.localization?.["street-required"] ?? "Address Line 1 is required");
+      return true;
     },
-    zip: {
-      required: true,
-      trigger: 'blur',
-      validator: (rule: FormItemRule, value: string) => {
-        if(!value) return Error( props.localization?.['zip-required'] ?? 'Postal code is required');
-        return true;
-      }
+  },
+  zip: {
+    required: true,
+    trigger: "blur",
+    validator: (rule: FormItemRule, value: string) => {
+      if (!value) return Error(props.localization?.["zip-required"] ?? "Postal code is required");
+      return true;
     },
-    city: {
-      required: true,
-      trigger: 'blur',
-      validator: (rule: FormItemRule, value: string) => {
-        if(!value) return Error( props.localization?.['city-required'] ?? 'City is required');
-        return true;
-      }
+  },
+  city: {
+    required: true,
+    trigger: "blur",
+    validator: (rule: FormItemRule, value: string) => {
+      if (!value) return Error(props.localization?.["city-required"] ?? "City is required");
+      return true;
     },
-  };
+  },
+  country: {
+    required: true,
+    trigger: "blur",
+    validator: (rule: FormItemRule, value: string) => {
+      if (!value) return Error(props.localization?.["country-required"] ?? "Country is required");
+      return true;
+    },
+  },
+};
 
+/**
+ * stolen from https://stackoverflow.com/a/70517921
+ */
+function getCountries(lang = "en") {
+  const A = 65;
+  const Z = 90;
+  const countryName = new Intl.DisplayNames([lang], { type: "region" });
+  const countries = {} as { [key: string]: string };
+  for (let i = A; i <= Z; ++i) {
+    for (let j = A; j <= Z; ++j) {
+      let code = String.fromCharCode(i) + String.fromCharCode(j);
+      let name = countryName.of(code);
+      if (name && code !== name) {
+        countries[code] = name;
+      }
+    }
+  }
+  return countries;
+}
+
+const countries: SelectOption[] = Object.entries(getCountries(props.locale ?? "en")).map(([key, value]) => ({
+  value: key,
+  label: value,
+}));
 </script>
 
 <style scoped lang="scss">

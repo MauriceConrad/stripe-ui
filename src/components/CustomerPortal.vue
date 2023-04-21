@@ -54,7 +54,7 @@ const props = defineProps<{
 const { fetchInvoices } = useInvoices(props.bridge);
 defineExpose({
   createCheckoutSession,
-  fetchInvoices
+  fetchInvoices,
 });
 
 const readyState = ref(0);

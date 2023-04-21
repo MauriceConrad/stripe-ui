@@ -18,7 +18,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "watch": "vite build --watch"
   },
   "dependencies": {
     "@stripe/stripe-js": "^1.42.0",
