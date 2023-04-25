@@ -2,13 +2,15 @@
   <div class="payment-methods control">
     <header>
       <n-h3>
-        {{ props.localization?.['payment-methods'] ?? 'Payment Methods'}}
+        {{ props.localization?.["payment-methods"] ?? "Payment Methods" }}
       </n-h3>
-      
     </header>
     <n-divider />
     <n-spin :show="paymentMethodsFetching">
-      <n-empty v-if="paymentMethods && paymentMethods.length === 0" :description="props.localization?.['payment-methods-empty'] ?? 'No payment methods'">
+      <n-empty
+        v-if="paymentMethods && paymentMethods.length === 0"
+        :description="props.localization?.['payment-methods-empty'] ?? 'No payment methods'"
+      >
         <template #icon>
           <n-icon>
             <card-outline />
@@ -16,9 +18,16 @@
         </template>
       </n-empty>
       <n-list class="payment-methods-list">
-        <PaymentMethod v-for="{ id, billing_details, card, type, created } in paymentMethods" :key="id" :card="card" :localization="localization">
+        <PaymentMethod
+          v-for="{ id, billing_details, card, type, created } in paymentMethods"
+          :key="id"
+          :card="card"
+          :localization="localization"
+        >
           <template #tags>
-            <n-tag v-if="customer?.invoice_settings.default_payment_method === id" type="success">{{props.localization?.['default'] ?? 'Default'}}</n-tag>
+            <n-tag v-if="customer?.invoice_settings.default_payment_method === id" type="success">{{
+              props.localization?.["default"] ?? "Default"
+            }}</n-tag>
           </template>
           <template #actions>
             <n-dropdown :options="options(id).value" @select="(key: string) => onSelect(key, id)">
@@ -55,13 +64,20 @@
             </div>
             
           </n-popup> -->
-          <n-button ghost round type="success" :loading="creatingCheckoutSession" :disabled="creatingCheckoutSession" @click="createCheckoutSession">
+          <n-button
+            ghost
+            round
+            type="success"
+            :loading="creatingCheckoutSession"
+            :disabled="creatingCheckoutSession"
+            @click="createCheckoutSession"
+          >
             <template #icon>
               <n-icon>
                 <add-outline />
               </n-icon>
             </template>
-            {{ props.localization?.['add-payment-method'] ?? 'Add Payment Method'}}
+            {{ props.localization?.["add-payment-method"] ?? "Add Payment Method" }}
           </n-button>
         </n-spin>
       </div>
@@ -69,21 +85,33 @@
   </div>
 </template>
 
-
 <script setup lang="ts">
-import type { StripeBridge } from '../../types'
-import usePaymentMethods from '../../services/paymentMethods'
-import { computed, h, ref } from 'vue'
-import { NButton, NIcon, NEmpty, NDivider, NH3, NSpin, NList, NTag, useDialog, NDropdown, DropdownOption, MenuOption } from 'naive-ui'
-import { EllipsisVertical, CardOutline, CloseOutline, AddOutline } from '@vicons/ionicons5'
-import 'naive-tools/style.css'
-import useScreen from '../../util/screen'
-import useCustomer from '../../services/customer'
-import useCheckout from '../../services/checkout'
-import Stripe from 'stripe'
-import { initStripe } from '../../services/stripe'
-import PaymentMethod from '../elements/PaymentMethod.vue'
-import { sortBy } from 'lodash'
+import type { StripeBridge } from "../../types";
+import usePaymentMethods from "../../services/paymentMethods";
+import { computed, h, ref } from "vue";
+import {
+  NButton,
+  NIcon,
+  NEmpty,
+  NDivider,
+  NH3,
+  NSpin,
+  NList,
+  NTag,
+  useDialog,
+  NDropdown,
+  DropdownOption,
+  MenuOption,
+} from "naive-ui";
+import { EllipsisVertical, CardOutline, CloseOutline, AddOutline } from "@vicons/ionicons5";
+import "naive-tools/style.css";
+import useScreen from "../../util/screen";
+import useCustomer from "../../services/customer";
+import useCheckout from "../../services/checkout";
+import Stripe from "stripe";
+import { initStripe } from "../../services/stripe";
+import PaymentMethod from "../elements/PaymentMethod.vue";
+import { sortBy } from "lodash";
 
 const props = defineProps<{
   bridge: StripeBridge;
@@ -94,7 +122,7 @@ const props = defineProps<{
     [key: string]: string;
   };
 }>();
-const emit = defineEmits(['ready']);
+const emit = defineEmits(["ready"]);
 
 initStripe(props.stripePublishableApiKey);
 
@@ -104,7 +132,14 @@ const screen = useScreen();
 const isMobile = computed(() => screen.width <= 600);
 
 const { customer, updateCustomer } = useCustomer(props.bridge);
-const { paymentMethods: _paymentMethods, paymentMethodsFetching, fetchPaymentMethods, createSetupIntent, updatePaymentMethod, deletePaymentMethod } = usePaymentMethods(props.bridge);
+const {
+  paymentMethods: _paymentMethods,
+  paymentMethodsFetching,
+  fetchPaymentMethods,
+  createSetupIntent,
+  updatePaymentMethod,
+  deletePaymentMethod,
+} = usePaymentMethods(props.bridge);
 const { createSession } = useCheckout(props.bridge);
 
 const paymentMethods = computed(() => {
@@ -125,12 +160,12 @@ const creatingCheckoutSession = ref(false);
 const checkoutSession = ref<Stripe.Checkout.Session>();
 const createCheckoutSession = async () => {
   creatingCheckoutSession.value = true;
-  checkoutSession.value = await createSession(['card', 'sepa_debit'], props.successUrl, props.cancelUrl, 'setup');
+  checkoutSession.value = await createSession(props.successUrl, props.cancelUrl, "setup");
   creatingCheckoutSession.value = false;
   if (checkoutSession.value.url) {
     window.location.href = checkoutSession.value.url;
   }
-}
+};
 
 defineExpose({
   createCheckoutSession,
@@ -145,8 +180,8 @@ defineExpose({
 //   }
 // })
 
-fetchPaymentMethods('card').then(() => {
-  emit('ready');
+fetchPaymentMethods("card").then(() => {
+  emit("ready");
 });
 
 // unused - maybe remove
@@ -161,23 +196,24 @@ const makeDefault = async (paymentMethodId: string) => {
     customer.value.invoice_settings.default_payment_method = paymentMethodId;
     await updateCustomer();
   }
-  
-}
+};
 
 const triggerPaymentMethodDeletion = (paymentMethodId: string) => {
   const deletionDialog = dialog.error({
-    title: props.localization?.['delete-payment-method-dialog-title'] ?? 'Delete Payment Method',
-    positiveText: props.localization?.['delete-payment-method-dialog-positive'] ?? 'Delete',
-    content: props.localization?.['delete-payment-method-dialog-content'] ?? 'This will delete the payment method an all realted data.',
+    title: props.localization?.["delete-payment-method-dialog-title"] ?? "Delete Payment Method",
+    positiveText: props.localization?.["delete-payment-method-dialog-positive"] ?? "Delete",
+    content:
+      props.localization?.["delete-payment-method-dialog-content"] ??
+      "This will delete the payment method an all realted data.",
     async onPositiveClick() {
       loading.value = true;
       deletePaymentMethod(paymentMethodId).finally(() => {
         loading.value = false;
-      })
+      });
       deletionDialog.destroy();
-    }
+    },
   });
-}
+};
 
 // unused - maybe remove
 // const onConfirmNewPaymentMethod = async () => {
@@ -185,35 +221,35 @@ const triggerPaymentMethodDeletion = (paymentMethodId: string) => {
 //   showAddView.value = false;
 // }
 
-const options = (id: string) => computed(() => {
-  return [
-    {
-      key: 'make-default',
-      label: props.localization?.['make-default'] ?? 'Make Default',
-      disabled: customer.value?.invoice_settings.default_payment_method === id,
-    },
-    {
-      key: 'delete',
-      label: props.localization?.['remove'] ?? 'Remove',
-    }
-  ] as DropdownOption[];
-})
+const options = (id: string) =>
+  computed(() => {
+    return [
+      {
+        key: "make-default",
+        label: props.localization?.["make-default"] ?? "Make Default",
+        disabled: customer.value?.invoice_settings.default_payment_method === id,
+      },
+      {
+        key: "delete",
+        label: props.localization?.["remove"] ?? "Remove",
+      },
+    ] as DropdownOption[];
+  });
 
 const loading = ref(false);
 function onSelect(key: string, id: string) {
-  switch(key) {
-    case 'make-default':
+  switch (key) {
+    case "make-default":
       loading.value = true;
       makeDefault(id).finally(() => {
         loading.value = false;
-      })
+      });
       break;
-    case 'delete':
+    case "delete":
       triggerPaymentMethodDeletion(id);
       break;
   }
-} 
-
+}
 </script>
 
 <style scoped lang="scss">
@@ -223,7 +259,7 @@ function onSelect(key: string, id: string) {
 .payment-methods-list {
   display: flex;
   flex-direction: column;
-  gap: .5rem;
+  gap: 0.5rem;
 }
 
 .payment-actions {
@@ -246,7 +282,6 @@ function onSelect(key: string, id: string) {
   place-items: center;
   width: 100%;
   height: 100%;
-  
 }
 .n-list {
   background-color: transparent;

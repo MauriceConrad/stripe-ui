@@ -15,7 +15,6 @@ export type StripeBridge = {
   checkout: {
     session: {
       create(
-        paymentMethodTypes: Stripe.Checkout.SessionCreateParams.PaymentMethodType[],
         successUrl: string,
         cancelUrl: string,
         mode: Stripe.Checkout.SessionCreateParams.Mode
