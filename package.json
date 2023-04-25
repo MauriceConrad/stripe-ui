@@ -1,7 +1,7 @@
 {
   "name": "vue-stripe-ui",
   "private": false,
-  "version": "0.0.14",
+  "version": "0.0.15-social",
   "type": "module",
   "files": [
     "package.json",
